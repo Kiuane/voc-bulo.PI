@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFF0D9" />
+  <title>Letrário</title>
+
+  <!-- Tailwind CSS via CDN (precisa de internet na primeira abertura). -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Configuração do Tailwind: paleta do projeto + animações.
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              blue: "#78A5CE",   // letra certa na posição certa
+              cream: "#FFF0D9",  // fundo
+              pink: "#DDA4B4",   // letra existe em outra posição
+              brown: "#7C5549",  // letra que não existe / botões
+            },
+            ink: "#4A2F27",      // marrom escuro (textos), derivado do marrom da paleta
+          },
+          keyframes: {
+            flip: {
+              "0%": { transform: "rotateX(0deg)" },
+              "50%": { transform: "rotateX(90deg)" },
+              "100%": { transform: "rotateX(0deg)" },
+            },
+            pop: {
+              "0%": { transform: "scale(0.85)" },
+              "60%": { transform: "scale(1.1)" },
+              "100%": { transform: "scale(1)" },
+            },
+            shake: {
+              "0%, 100%": { transform: "translateX(0)" },
+              "20%, 60%": { transform: "translateX(-6px)" },
+              "40%, 80%": { transform: "translateX(6px)" },
+            },
+            hop: {
+              "0%, 100%": { transform: "translateY(0)" },
+              "50%": { transform: "translateY(-10px)" },
+            },
+            fadein: {
+              "0%": { opacity: "0", transform: "translateY(8px)" },
+              "100%": { opacity: "1", transform: "translateY(0)" },
+            },
+          },
+          animation: {
+            flip: "flip 0.5s ease both",
+            pop: "pop 0.2s ease-out",
+            shake: "shake 0.4s ease",
+            hop: "hop 0.6s ease both",
+            fadein: "fadein 0.35s ease both",
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="min-h-screen bg-brand-cream text-ink antialiased flex flex-col">
+
+  <!-- Cabeçalho -->
+  <header class="border-b-2 border-brand-brown/20">
+    <div class="mx-auto flex w-full max-w-3xl items-center justify-between px-3 py-2 sm:px-4">
+      <button id="help-btn" aria-label="Como jogar"
+        class="h-10 w-10 rounded-lg border-2 border-brand-brown/60 font-bold text-brand-brown transition hover:bg-brand-brown/10 active:scale-95">?</button>
+      <h1 class="text-3xl font-black tracking-tight text-brand-brown sm:text-4xl">LETRÁRIO</h1>
+      <button id="restart-btn" aria-label="Reiniciar partida"
+        class="h-10 w-10 rounded-lg border-2 border-brand-brown/60 text-lg font-bold text-brand-brown transition hover:bg-brand-brown/10 active:scale-95">↻</button>
+    </div>
+  </header>
+
+  <!-- Conteúdo -->
+  <main class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-3 px-2 py-3 sm:px-4">
+
+    <!-- Informações da fase -->
+    <section class="grid grid-cols-3 gap-2 text-center">
+      <div class="rounded-xl bg-white/60 px-1 py-2 shadow-sm ring-1 ring-brand-brown/15">
+        <p class="text-[11px] text-brand-brown sm:text-xs">Nível</p>
+        <p id="info-level" class="text-base font-extrabold sm:text-lg">1/10</p>
+      </div>
+      <div class="rounded-xl bg-white/60 px-1 py-2 shadow-sm ring-1 ring-brand-brown/15">
+        <p class="text-[11px] text-brand-brown sm:text-xs">Palavra</p>
+        <p id="info-word" class="text-base font-extrabold sm:text-lg">1/2</p>
+      </div>
+      <div class="rounded-xl bg-white/60 px-1 py-2 shadow-sm ring-1 ring-brand-brown/15">
+        <p class="text-[11px] text-brand-brown sm:text-xs">Tentativas</p>
+        <p id="info-attempts" class="text-base font-extrabold sm:text-lg">0/4</p>
+      </div>
+    </section>
+
+    <!-- Dicas -->
+    <section class="flex flex-col gap-2">
+      <div class="rounded-xl bg-brand-brown px-3 py-2 text-center text-sm font-semibold text-brand-cream shadow sm:text-base">
+        <span id="theme-hint">Carregando…</span>
+        <span id="letters-info" class="block text-xs font-normal opacity-80"></span>
+      </div>
+
+      <button id="hint-btn"
+        class="hidden w-full rounded-xl bg-brand-pink px-3 py-2 text-sm font-bold text-ink shadow transition hover:brightness-95 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:text-base">
+        Pedir dica extra (1 por nível)
+      </button>
+      <p id="hint-text"
+        class="hidden rounded-xl bg-brand-pink/30 px-3 py-2 text-center text-sm font-semibold ring-1 ring-brand-pink sm:text-base"></p>
+    </section>
+
+    <!-- Grade -->
+    <section id="board" class="flex w-full flex-col items-center gap-1 pb-2"></section>
+  </main>
+
+  <!-- Teclado (fixo na parte de baixo) -->
+  <footer class="sticky bottom-0 border-t-2 border-brand-brown/20 bg-brand-cream/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur">
+    <div id="keyboard" class="mx-auto flex w-full max-w-xl flex-col gap-1.5 px-1.5 sm:px-3"></div>
+  </footer>
+
+  <!-- Mensagem rápida -->
+  <div id="toast"
+    class="pointer-events-none fixed left-1/2 top-16 z-50 hidden max-w-[90%] -translate-x-1/2 rounded-xl bg-ink px-4 py-2 text-center text-sm font-semibold text-brand-cream shadow-lg"></div>
+
+  <!-- Telas sobrepostas (resultado, transição, ajuda, final) -->
+  <div id="overlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-ink/60 p-4">
+    <div id="overlay-box"
+      class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-brand-cream p-5 text-center shadow-2xl ring-2 ring-brand-brown/30"></div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html>
